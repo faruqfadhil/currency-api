@@ -2,6 +2,7 @@ package currency
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/faruqfadhil/currency-api/core/entity"
@@ -39,5 +40,15 @@ func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyReque
 }
 
 func (r *repository) FindByID(ctx context.Context, ID string) (*entity.Currency, error) {
-	return nil, nil
+	var out Currency
+	err := r.db.Table(currency.String()).
+		Where("id = ?", ID).
+		Find(&out).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("%w:[FindByID] err: %v", errutil.ErrGeneralNotFound, err)
+		}
+		return nil, fmt.Errorf("%w:[FindByID] err: %v", errutil.ErrGeneralDB, err)
+	}
+	return out.ToEntity(), nil
 }

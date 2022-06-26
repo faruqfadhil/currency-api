@@ -29,3 +29,7 @@ func (c Currency) FromCreateCurrencyRequestEntity(currency *entity.CreateCurrenc
 		UpdatedBy: currency.CreatedBy,
 	}
 }
+
+func (c *Currency) ToEntity() *entity.Currency {
+	return &entity.Currency{}
+}
