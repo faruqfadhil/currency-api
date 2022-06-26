@@ -15,9 +15,10 @@ type ResponseError struct {
 }
 
 type Response struct {
-	Status  string      `json:"status,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Message string      `json:"message,omitempty"`
+	Status  string      `json:"status"`
+	Code    int         `json:"code"`
+	Data    interface{} `json:"data"`
+	Message string      `json:"message"`
 }
 
 func internalServerErr(err error) *ResponseError {
@@ -59,6 +60,7 @@ func ResponseFailed(c *gin.Context, err error) {
 func ResponseSuccess(c *gin.Context, out interface{}, message string) {
 	c.JSON(http.StatusOK, Response{
 		Status:  "success",
+		Code:    http.StatusOK,
 		Data:    out,
 		Message: message,
 	})
