@@ -7,6 +7,7 @@ import (
 
 	"github.com/faruqfadhil/currency-api/core/entity"
 	errutil "github.com/faruqfadhil/currency-api/pkg/error"
+	"github.com/faruqfadhil/currency-api/pkg/validation"
 	currencyRepo "github.com/faruqfadhil/currency-api/repository/currency"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -44,26 +45,38 @@ func TestCreateCurrency(t *testing.T) {
 				},
 				CreatedBy: "t3",
 			},
-			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("ID is required"), "ID is required"),
-		},
-		"bad request empty Name": {
-			req: &entity.CreateCurrencyRequest{
-				Currency: &entity.Currency{
-					ID: 4,
-				},
-				CreatedBy: "t4",
-			},
-			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("name is required"), "Name is required"),
+			err: errutil.New(errutil.ErrGeneralBadRequest, errutil.ErrGeneralBadRequest),
 		},
 	}
 
 	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
-	svc := New(repo)
+	validator := &validation.ValidatorMock{Mock: mock.Mock{}}
+	svc := New(repo, validator)
 	repo.Mock.On("FindByID", context.Background(), 1).Return(nil, errutil.New(errutil.ErrGeneralNotFound, errutil.ErrGeneralNotFound))
 	repo.Mock.On("FindByID", context.Background(), 2).Return(&entity.Currency{
 		ID:   2,
 		Name: "test2",
 	}, nil)
+	validator.Mock.On("ValidateParam", &entity.CreateCurrencyRequest{
+		Currency: &entity.Currency{
+			ID:   1,
+			Name: "test1",
+		},
+		CreatedBy: "t1",
+	}).Return(nil)
+	validator.Mock.On("ValidateParam", &entity.CreateCurrencyRequest{
+		Currency: &entity.Currency{
+			ID:   2,
+			Name: "test2",
+		},
+		CreatedBy: "t2",
+	}).Return(nil)
+	validator.Mock.On("ValidateParam", &entity.CreateCurrencyRequest{
+		Currency: &entity.Currency{
+			Name: "test3",
+		},
+		CreatedBy: "t3",
+	}).Return(errutil.New(errutil.ErrGeneralBadRequest, errutil.ErrGeneralBadRequest))
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {

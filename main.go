@@ -7,8 +7,10 @@ import (
 	"github.com/faruqfadhil/currency-api/config"
 	"github.com/faruqfadhil/currency-api/core/module"
 	"github.com/faruqfadhil/currency-api/handler"
+	"github.com/faruqfadhil/currency-api/pkg/validation"
 	currencyRepo "github.com/faruqfadhil/currency-api/repository/currency"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -17,10 +19,10 @@ func main() {
 	cfg := config.Get()
 	db := conn(&cfg)
 	repo := currencyRepo.New(db)
-	usecase := module.New(repo)
+	internalValidator := validation.NewGoValidator(validator.New())
+	usecase := module.New(repo, internalValidator)
 	handler := handler.New(usecase)
-
-	router := gin.New()
+	router := gin.Default()
 	apiv1 := router.Group("/api/v1/currency")
 	{
 		apiv1.POST("/create", handler.CreateCurrency)
