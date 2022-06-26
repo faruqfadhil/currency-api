@@ -30,11 +30,11 @@ func (u *usecase) CreateCurrency(ctx context.Context, req *entity.CreateCurrency
 	}
 
 	existingCurrency, err := u.repo.FindByID(ctx, req.ID)
-	if err != nil && !errors.Is(errutil.ErrGeneralNotFound, err) {
+	if err != nil && !errors.Is(errutil.ErrGeneralNotFound, errutil.GetTypeErr(err)) {
 		return err
 	}
 	if existingCurrency != nil {
-		return fmt.Errorf("%w:%s", errutil.ErrGeneralBadRequest, "currency ID already exist")
+		return errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("currency ID already exist"), "currency ID already exist")
 	}
 
 	return u.repo.Insert(ctx, req)

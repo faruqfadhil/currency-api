@@ -35,7 +35,7 @@ func TestCreateCurrency(t *testing.T) {
 				},
 				CreatedBy: "t2",
 			},
-			err: fmt.Errorf("%w:%s", errutil.ErrGeneralBadRequest, "currency ID already exist"),
+			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("currency ID already exist"), "currency ID already exist"),
 		},
 		"bad request empty ID": {
 			req: &entity.CreateCurrencyRequest{
@@ -44,7 +44,7 @@ func TestCreateCurrency(t *testing.T) {
 				},
 				CreatedBy: "t3",
 			},
-			err: fmt.Errorf("%w:ID is required", errutil.ErrGeneralBadRequest),
+			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("ID is required"), "ID is required"),
 		},
 		"bad request empty Name": {
 			req: &entity.CreateCurrencyRequest{
@@ -53,13 +53,13 @@ func TestCreateCurrency(t *testing.T) {
 				},
 				CreatedBy: "t4",
 			},
-			err: fmt.Errorf("%w:Name is required", errutil.ErrGeneralBadRequest),
+			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("name is required"), "Name is required"),
 		},
 	}
 
 	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
 	svc := New(repo)
-	repo.Mock.On("FindByID", context.Background(), 1).Return(nil, errutil.ErrGeneralNotFound)
+	repo.Mock.On("FindByID", context.Background(), 1).Return(nil, errutil.New(errutil.ErrGeneralNotFound, errutil.ErrGeneralNotFound))
 	repo.Mock.On("FindByID", context.Background(), 2).Return(&entity.Currency{
 		ID:   2,
 		Name: "test2",

@@ -33,22 +33,22 @@ func New(db *gorm.DB) repoInterface.Repository {
 
 func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyRequest) error {
 	model := Currency{}.FromCreateCurrencyRequestEntity(req)
-	if err := r.db.Table(currency.String()).Create(&model).Error; err != nil {
-		return fmt.Errorf("%w:[Insert] err: %v", errutil.ErrGeneralDB, err)
+	if err := r.db.Debug().Table(currency.String()).Create(&model).Error; err != nil {
+		return errutil.New(errutil.ErrGeneralNotFound, fmt.Errorf("[Insert] err: %v", err))
 	}
 	return nil
 }
 
 func (r *repository) FindByID(ctx context.Context, ID int) (*entity.Currency, error) {
 	var out Currency
-	err := r.db.Table(currency.String()).
+	err := r.db.Debug().Table(currency.String()).
 		Where("id = ?", ID).
-		Find(&out).Error
+		First(&out).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("%w:[FindByID] err: %v", errutil.ErrGeneralNotFound, err)
+			return nil, errutil.New(errutil.ErrGeneralNotFound, fmt.Errorf("[FindByID] err: %v", err))
 		}
-		return nil, fmt.Errorf("%w:[FindByID] err: %v", errutil.ErrGeneralDB, err)
+		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindByID] err: %v", err))
 	}
 	return out.ToEntity(), nil
 }

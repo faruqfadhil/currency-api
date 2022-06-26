@@ -7,21 +7,21 @@ import (
 )
 
 type Currency struct {
-	ID   int
-	Name string
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type CreateCurrencyRequest struct {
 	*Currency
-	CreatedBy string
+	CreatedBy string `json:"-"`
 }
 
 func (c *CreateCurrencyRequest) Validate() error {
 	if c.ID == 0 {
-		return fmt.Errorf("%w:ID is required", errutil.ErrGeneralBadRequest)
+		return errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("ID is required"), "ID is required")
 	}
 	if c.Name == "" {
-		return fmt.Errorf("%w:Name is required", errutil.ErrGeneralBadRequest)
+		return errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("name is required"), "Name is required")
 	}
 	return nil
 }
