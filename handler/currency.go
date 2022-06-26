@@ -34,3 +34,18 @@ func (h *HTTPHandler) CreateCurrency(c *gin.Context) {
 
 	api.ResponseSuccess(c, "", "success")
 }
+
+func (h *HTTPHandler) CreateConversionRate(c *gin.Context) {
+	var payload *entity.CreateCurrencyConversionRate
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		api.ResponseFailed(c, errutil.ErrGeneralBadRequest)
+		return
+	}
+	err := h.usecase.CreateConversionRate(context.Background(), payload)
+	if err != nil {
+		api.ResponseFailed(c, err)
+		return
+	}
+
+	api.ResponseSuccess(c, "", "success")
+}

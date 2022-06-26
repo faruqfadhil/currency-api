@@ -22,3 +22,15 @@ func (r *RepositoryMock) FindByID(ctx context.Context, ID int) (*entity.Currency
 	}
 	return args.Get(0).(*entity.Currency), nil
 }
+
+func (r *RepositoryMock) InsertConversionRates(ctx context.Context, reqs []*entity.CreateCurrencyConversionRate) error {
+	return nil
+}
+
+func (r *RepositoryMock) FindConversionRateByFromTo(ctx context.Context, from, to int) (*entity.CurrencyConversionRate, error) {
+	args := r.Mock.Called(ctx, from, to)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.CurrencyConversionRate), nil
+}

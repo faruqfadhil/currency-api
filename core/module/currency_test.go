@@ -85,3 +85,65 @@ func TestCreateCurrency(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateConversionRate(t *testing.T) {
+	tests := map[string]struct {
+		req *entity.CreateCurrencyConversionRate
+		err error
+	}{
+		"success": {
+			req: &entity.CreateCurrencyConversionRate{
+				CurrencyConversionRate: &entity.CurrencyConversionRate{
+					From: 1,
+					To:   2,
+					Rate: 20,
+				},
+				CreatedBy: "t1",
+			},
+			err: nil,
+		},
+		"already exist": {
+			req: &entity.CreateCurrencyConversionRate{
+				CurrencyConversionRate: &entity.CurrencyConversionRate{
+					From: 2,
+					To:   1,
+					Rate: 20,
+				},
+				CreatedBy: "t2",
+			},
+			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("conversion rate already exist"), "conversion rate already exist"),
+		},
+	}
+	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
+	validator := &validation.ValidatorMock{Mock: mock.Mock{}}
+	svc := New(repo, validator)
+
+	repo.Mock.On("FindConversionRateByFromTo", context.Background(), 1, 2).Return(nil, errutil.New(errutil.ErrGeneralNotFound, errutil.ErrGeneralNotFound))
+	repo.Mock.On("FindConversionRateByFromTo", context.Background(), 2, 1).Return(&entity.CurrencyConversionRate{
+		From: 2,
+		To:   1,
+		Rate: 20,
+	}, nil)
+	validator.Mock.On("ValidateParam", &entity.CreateCurrencyConversionRate{
+		CurrencyConversionRate: &entity.CurrencyConversionRate{
+			From: 1,
+			To:   2,
+			Rate: 20,
+		},
+		CreatedBy: "t1",
+	}).Return(nil)
+	validator.Mock.On("ValidateParam", &entity.CreateCurrencyConversionRate{
+		CurrencyConversionRate: &entity.CurrencyConversionRate{
+			From: 2,
+			To:   1,
+			Rate: 20,
+		},
+		CreatedBy: "t2",
+	}).Return(nil)
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := svc.CreateConversionRate(context.Background(), test.req)
+			assert.Equal(t, test.err, err)
+		})
+	}
+}

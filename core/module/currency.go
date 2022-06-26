@@ -13,6 +13,7 @@ import (
 
 type Usecase interface {
 	CreateCurrency(ctx context.Context, req *entity.CreateCurrencyRequest) error
+	CreateConversionRate(ctx context.Context, req *entity.CreateCurrencyConversionRate) error
 }
 
 type usecase struct {
@@ -40,4 +41,21 @@ func (u *usecase) CreateCurrency(ctx context.Context, req *entity.CreateCurrency
 	}
 
 	return u.repo.Insert(ctx, req)
+}
+
+func (u *usecase) CreateConversionRate(ctx context.Context, req *entity.CreateCurrencyConversionRate) error {
+	if err := u.validator.ValidateParam(req); err != nil {
+		return err
+	}
+	existingConversionRate, err := u.repo.FindConversionRateByFromTo(ctx, req.From, req.To)
+	if err != nil && !errors.Is(errutil.ErrGeneralNotFound, errutil.GetTypeErr(err)) {
+		return err
+	}
+	if existingConversionRate != nil {
+		return errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("conversion rate already exist"), "conversion rate already exist")
+	}
+
+	var payloads []*entity.CreateCurrencyConversionRate
+	payloads = append(payloads, req, req.MakeOppositeConversion())
+	return u.repo.InsertConversionRates(ctx, payloads)
 }

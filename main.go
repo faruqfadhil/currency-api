@@ -26,6 +26,7 @@ func main() {
 	apiv1 := router.Group("/api/v1/currency")
 	{
 		apiv1.POST("/create", handler.CreateCurrency)
+		apiv1.POST("/conversion/create", handler.CreateConversionRate)
 	}
 	router.Run(fmt.Sprintf(":%s", cfg.Port))
 }

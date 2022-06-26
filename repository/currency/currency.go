@@ -18,7 +18,8 @@ func (t table) String() string {
 }
 
 const (
-	currency table = "currency"
+	currency       table = "currency"
+	conversionRate table = "currency_conversion_rate"
 )
 
 type repository struct {
@@ -34,7 +35,7 @@ func New(db *gorm.DB) repoInterface.Repository {
 func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyRequest) error {
 	model := Currency{}.FromCreateCurrencyRequestEntity(req)
 	if err := r.db.Debug().Table(currency.String()).Create(&model).Error; err != nil {
-		return errutil.New(errutil.ErrGeneralNotFound, fmt.Errorf("[Insert] err: %v", err))
+		return errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[Insert] err: %v", err))
 	}
 	return nil
 }
@@ -49,6 +50,33 @@ func (r *repository) FindByID(ctx context.Context, ID int) (*entity.Currency, er
 			return nil, errutil.New(errutil.ErrGeneralNotFound, fmt.Errorf("[FindByID] err: %v", err))
 		}
 		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindByID] err: %v", err))
+	}
+	return out.ToEntity(), nil
+}
+
+func (r *repository) InsertConversionRates(ctx context.Context, reqs []*entity.CreateCurrencyConversionRate) error {
+	var models []*CurrencyConversionRate
+	for _, req := range reqs {
+		models = append(models, CurrencyConversionRate{}.FromCreateCurrencyConversionRateRequestEntity(req))
+	}
+	if err := r.db.Debug().Table(conversionRate.String()).Create(&models).Error; err != nil {
+		return errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[InsertConversionRates] err: %v", err))
+	}
+	return nil
+}
+
+func (r *repository) FindConversionRateByFromTo(ctx context.Context, from, to int) (*entity.CurrencyConversionRate, error) {
+	var out CurrencyConversionRate
+	err := r.db.Debug().Table(conversionRate.String()).
+		Where("from_currency_id = ?", from).
+		Where("to_currency_id = ?", to).
+		Where("is_deleted = ?", false).
+		First(&out).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errutil.New(errutil.ErrGeneralNotFound, fmt.Errorf("[FindConversionRateByFromTo] err: %v", err))
+		}
+		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindConversionRateByFromTo] err: %v", err))
 	}
 	return out.ToEntity(), nil
 }
