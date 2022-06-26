@@ -10,8 +10,9 @@ type Currency struct {
 }
 
 type CreateCurrencyRequest struct {
-	ID   string
-	Name string
+	ID        string
+	Name      string
+	CreatedBy string
 }
 
 func (c *CreateCurrencyRequest) Validate() error {
