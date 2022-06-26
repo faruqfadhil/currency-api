@@ -37,3 +37,40 @@ curl --location --request POST 'http://localhost:8081/api/v1/currency/create' \
     "message": " Name is required"
 }
 ```
+
+## Create new conversion rate
+### Request
+`POST /api/v1/currency/conversion/create`
+
+```shell
+curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion/create' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "from":2,
+    "to":3,
+    "rate":29
+}'
+```
+
+#### Payload
+- from (int, required)
+- to (int, required)
+- rate(float, required)
+
+### Response
+```shell
+# Success
+{
+    "status": "success",
+    "code": 200,
+    "data": "",
+    "message": "success"
+}
+
+# Bad request
+{
+    "status": "error",
+    "code": 400,
+    "message": " Rate is required"
+}
+```
