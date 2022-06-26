@@ -30,7 +30,12 @@ func New(typeErr error, originalErr error, userErrMsg ...string) error {
 	}
 }
 
-func (d *InternalError) Error() string { return d.UserErrMsg }
+func (d *InternalError) Error() string {
+	if d.UserErrMsg == "" {
+		return "unexpected error"
+	}
+	return d.UserErrMsg
+}
 
 func toInternalErr(err error) *InternalError {
 	var intErr *InternalError

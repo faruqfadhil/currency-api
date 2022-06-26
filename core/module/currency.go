@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/faruqfadhil/currency-api/core/entity"
 	"github.com/faruqfadhil/currency-api/core/repository"
@@ -14,6 +15,7 @@ import (
 type Usecase interface {
 	CreateCurrency(ctx context.Context, req *entity.CreateCurrencyRequest) error
 	CreateConversionRate(ctx context.Context, req *entity.CreateCurrencyConversionRate) error
+	Convert(ctx context.Context, req *entity.ConvertRequest) (float64, error)
 }
 
 type usecase struct {
@@ -58,4 +60,18 @@ func (u *usecase) CreateConversionRate(ctx context.Context, req *entity.CreateCu
 	var payloads []*entity.CreateCurrencyConversionRate
 	payloads = append(payloads, req, req.MakeOppositeConversion())
 	return u.repo.InsertConversionRates(ctx, payloads)
+}
+
+func (u *usecase) Convert(ctx context.Context, req *entity.ConvertRequest) (float64, error) {
+	if err := u.validator.ValidateParam(req); err != nil {
+		return 0, err
+	}
+	conversionRate, err := u.repo.FindConversionRateByFromTo(ctx, req.From, req.To)
+	if err != nil {
+		if errors.Is(errutil.ErrGeneralNotFound, errutil.GetTypeErr(err)) {
+			return 0, errutil.New(errutil.ErrGeneralNotFound, err, fmt.Sprintf("conversion rate from %d to %d not found", req.From, req.To))
+		}
+		return 0, err
+	}
+	return math.Round(req.Amount * conversionRate.Rate), nil
 }

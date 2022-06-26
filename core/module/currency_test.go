@@ -2,7 +2,6 @@ package module
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/faruqfadhil/currency-api/core/entity"
@@ -36,7 +35,7 @@ func TestCreateCurrency(t *testing.T) {
 				},
 				CreatedBy: "t2",
 			},
-			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("currency ID already exist"), "currency ID already exist"),
+			err: errutil.New(errutil.ErrGeneralBadRequest, errutil.ErrGeneralBadRequest),
 		},
 		"bad request empty ID": {
 			req: &entity.CreateCurrencyRequest{
@@ -81,7 +80,7 @@ func TestCreateCurrency(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			err := svc.CreateCurrency(context.Background(), test.req)
-			assert.Equal(t, test.err, err)
+			assert.Equal(t, errutil.GetTypeErr(test.err), errutil.GetTypeErr(err))
 		})
 	}
 }
@@ -111,7 +110,7 @@ func TestCreateConversionRate(t *testing.T) {
 				},
 				CreatedBy: "t2",
 			},
-			err: errutil.New(errutil.ErrGeneralBadRequest, fmt.Errorf("conversion rate already exist"), "conversion rate already exist"),
+			err: errutil.New(errutil.ErrGeneralBadRequest, errutil.ErrGeneralBadRequest),
 		},
 	}
 	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
@@ -143,7 +142,60 @@ func TestCreateConversionRate(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			err := svc.CreateConversionRate(context.Background(), test.req)
-			assert.Equal(t, test.err, err)
+			assert.Equal(t, errutil.GetTypeErr(test.err), errutil.GetTypeErr(err))
+		})
+	}
+}
+
+func TestConvert(t *testing.T) {
+	tests := map[string]struct {
+		req *entity.ConvertRequest
+		err error
+		out float64
+	}{
+		"success": {
+			req: &entity.ConvertRequest{
+				From:   1,
+				To:     2,
+				Amount: 10,
+			},
+			err: nil,
+			out: 20,
+		},
+		"not found": {
+			req: &entity.ConvertRequest{
+				From:   1,
+				To:     3,
+				Amount: 10,
+			},
+			err: errutil.New(errutil.ErrGeneralNotFound, errutil.ErrGeneralNotFound),
+			out: 0,
+		},
+	}
+	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
+	validator := &validation.ValidatorMock{Mock: mock.Mock{}}
+	svc := New(repo, validator)
+	repo.Mock.On("FindConversionRateByFromTo", context.Background(), 1, 2).Return(&entity.CurrencyConversionRate{
+		From: 1,
+		To:   2,
+		Rate: 2,
+	}, nil)
+	repo.Mock.On("FindConversionRateByFromTo", context.Background(), 1, 3).Return(nil, errutil.New(errutil.ErrGeneralNotFound, errutil.ErrGeneralNotFound))
+	validator.Mock.On("ValidateParam", &entity.ConvertRequest{
+		From:   1,
+		To:     2,
+		Amount: 10,
+	}).Return(nil)
+	validator.Mock.On("ValidateParam", &entity.ConvertRequest{
+		From:   1,
+		To:     3,
+		Amount: 10,
+	}).Return(nil)
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			out, err := svc.Convert(context.Background(), test.req)
+			assert.Equal(t, errutil.GetTypeErr(test.err), errutil.GetTypeErr(err))
+			assert.Equal(t, test.out, out)
 		})
 	}
 }

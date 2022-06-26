@@ -13,7 +13,7 @@ type CreateCurrencyRequest struct {
 type CurrencyConversionRate struct {
 	From int     `json:"from" validate:"required"`
 	To   int     `json:"to" validate:"required"`
-	Rate float64 `json:"rate" validate:"required"`
+	Rate float64 `json:"rate" validate:"gte=0"`
 }
 
 type CreateCurrencyConversionRate struct {
@@ -30,4 +30,10 @@ func (c *CreateCurrencyConversionRate) MakeOppositeConversion() *CreateCurrencyC
 		},
 		CreatedBy: c.CreatedBy,
 	}
+}
+
+type ConvertRequest struct {
+	From   int     `json:"from" validate:"required"`
+	To     int     `json:"to" validate:"required"`
+	Amount float64 `json:"amount" validate:"gte=0"`
 }

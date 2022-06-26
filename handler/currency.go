@@ -49,3 +49,18 @@ func (h *HTTPHandler) CreateConversionRate(c *gin.Context) {
 
 	api.ResponseSuccess(c, "", "success")
 }
+
+func (h *HTTPHandler) Convert(c *gin.Context) {
+	var payload *entity.ConvertRequest
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		api.ResponseFailed(c, errutil.ErrGeneralBadRequest)
+		return
+	}
+	resp, err := h.usecase.Convert(context.Background(), payload)
+	if err != nil {
+		api.ResponseFailed(c, err)
+		return
+	}
+
+	api.ResponseSuccess(c, resp, "success")
+}

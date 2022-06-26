@@ -55,7 +55,7 @@ curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion
 #### Payload
 - from (int, required)
 - to (int, required)
-- rate(float, required)
+- rate(float, required, should be greater than or equal 0, default 0)
 
 ### Response
 ```shell
@@ -71,6 +71,6 @@ curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion
 {
     "status": "error",
     "code": 400,
-    "message": " Rate is required"
+    "message": " To is required"
 }
 ```
