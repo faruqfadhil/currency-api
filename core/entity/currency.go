@@ -7,16 +7,17 @@ import (
 )
 
 type Currency struct {
+	ID   int
+	Name string
 }
 
 type CreateCurrencyRequest struct {
-	ID        string
-	Name      string
+	*Currency
 	CreatedBy string
 }
 
 func (c *CreateCurrencyRequest) Validate() error {
-	if c.ID == "" {
+	if c.ID == 0 {
 		return fmt.Errorf("%w:ID is required", errutil.ErrGeneralBadRequest)
 	}
 	if c.Name == "" {

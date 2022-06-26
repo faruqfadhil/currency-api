@@ -8,5 +8,5 @@ import (
 
 type Repository interface {
 	Insert(ctx context.Context, req *entity.CreateCurrencyRequest) error
-	FindByID(ctx context.Context, ID string) (*entity.Currency, error)
+	FindByID(ctx context.Context, ID int) (*entity.Currency, error)
 }

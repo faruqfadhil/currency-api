@@ -7,7 +7,7 @@ import (
 )
 
 type Currency struct {
-	ID        string
+	ID        int
 	Name      string
 	CreatedAt time.Time
 	CreatedBy string
@@ -31,5 +31,8 @@ func (c Currency) FromCreateCurrencyRequestEntity(currency *entity.CreateCurrenc
 }
 
 func (c *Currency) ToEntity() *entity.Currency {
-	return &entity.Currency{}
+	return &entity.Currency{
+		ID:   c.ID,
+		Name: c.Name,
+	}
 }

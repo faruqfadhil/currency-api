@@ -19,7 +19,9 @@ type usecase struct {
 }
 
 func New(repo repository.Repository) Usecase {
-	return &usecase{}
+	return &usecase{
+		repo: repo,
+	}
 }
 
 func (u *usecase) CreateCurrency(ctx context.Context, req *entity.CreateCurrencyRequest) error {

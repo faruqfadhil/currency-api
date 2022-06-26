@@ -39,7 +39,7 @@ func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyReque
 	return nil
 }
 
-func (r *repository) FindByID(ctx context.Context, ID string) (*entity.Currency, error) {
+func (r *repository) FindByID(ctx context.Context, ID int) (*entity.Currency, error) {
 	var out Currency
 	err := r.db.Table(currency.String()).
 		Where("id = ?", ID).
