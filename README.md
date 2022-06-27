@@ -1,6 +1,6 @@
 # CURRENCY APIs
 
-# Run Apps
+# Running The Apps
 ```shell
 # Run in the background:
 docker-compose up -d
@@ -15,10 +15,13 @@ docker-compose up -d
 
 docker-compose up --build
 ```
-# Stop Apps
+# Stopping The Apps
 ```shell
 docker-compose down --remove-orphans --volumes
 ```
+
+# Database Schema
+![My Image](db/schema.png)
 
 # APIs Contract
 APIs contract for currency-api service
