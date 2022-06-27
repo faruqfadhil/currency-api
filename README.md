@@ -20,6 +20,11 @@ docker-compose up --build
 docker-compose down --remove-orphans --volumes
 ```
 
+# Unit Test
+```shell
+go test -v ./...
+```
+
 # Database Schema
 ![My Image](db/schema.png)
 
