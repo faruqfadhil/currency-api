@@ -3,21 +3,21 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
-	"github.com/faruqfadhil/currency-api/config"
 	"github.com/faruqfadhil/currency-api/core/module"
 	"github.com/faruqfadhil/currency-api/handler"
 	"github.com/faruqfadhil/currency-api/pkg/validation"
 	currencyRepo "github.com/faruqfadhil/currency-api/repository/currency"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func main() {
-	cfg := config.Get()
-	db := conn(&cfg)
+	db := conn()
 	repo := currencyRepo.New(db)
 	internalValidator := validation.NewGoValidator(validator.New())
 	usecase := module.New(repo, internalValidator)
@@ -30,12 +30,17 @@ func main() {
 		apiv1.POST("/conversion/convert", handler.Convert)
 		apiv1.GET("/list", handler.GetCurrencies)
 	}
-	router.Run(fmt.Sprintf(":%s", cfg.Port))
+	router.Run()
 }
 
-func conn(cfg *config.Config) *gorm.DB {
+func conn() *gorm.DB {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("unable to load env, err: %v", err)
+	}
 	defaultParams := "charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", cfg.CurrencyDBUsername, cfg.CurrencyDBPassword, cfg.CurrencyDBHost, cfg.CurrencyDBPort, cfg.CurrencyDBName, defaultParams)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"), defaultParams)
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error when try to connect db: %v", err)

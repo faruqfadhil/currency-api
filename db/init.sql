@@ -1,4 +1,18 @@
-CREATE TABLE `currency_conversion_rate` (
+create database if not exists currency_db;
+
+use currency_db;
+
+CREATE TABLE IF NOT EXISTS `currency` (
+  `id` int(11) NOT NULL COMMENT 'currency identifier',
+  `name` varchar(255) NOT NULL DEFAULT '' COMMENT 'currency name',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created date',
+  `created_by` varchar(255) NOT NULL DEFAULT '' COMMENT 'user who create this entity',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'update date',
+  `updated_by` varchar(255) NOT NULL DEFAULT '' COMMENT 'user who update this entity',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `currency_conversion_rate` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'auto increment id',
   `from_currency_id` int(11) NOT NULL COMMENT 'from currency identifier',
   `to_currency_id` int(11) NOT NULL COMMENT 'to currency identifier',
@@ -13,4 +27,5 @@ CREATE TABLE `currency_conversion_rate` (
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `UC_from_to` (`from_currency_id`,`to_currency_id`,`is_deleted`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
