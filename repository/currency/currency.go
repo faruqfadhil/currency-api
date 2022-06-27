@@ -35,7 +35,7 @@ func New(db *gorm.DB) repoInterface.Repository {
 
 func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyRequest) error {
 	model := Currency{}.FromCreateCurrencyRequestEntity(req)
-	if err := r.db.Debug().Table(currency.String()).Create(&model).Error; err != nil {
+	if err := r.db.Table(currency.String()).Create(&model).Error; err != nil {
 		return errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[Insert] err: %v", err))
 	}
 	return nil
@@ -43,7 +43,7 @@ func (r *repository) Insert(ctx context.Context, req *entity.CreateCurrencyReque
 
 func (r *repository) FindByID(ctx context.Context, ID int) (*entity.Currency, error) {
 	var out Currency
-	err := r.db.Debug().Table(currency.String()).
+	err := r.db.Table(currency.String()).
 		Where("id = ?", ID).
 		First(&out).Error
 	if err != nil {
@@ -60,7 +60,7 @@ func (r *repository) InsertConversionRates(ctx context.Context, reqs []*entity.C
 	for _, req := range reqs {
 		models = append(models, CurrencyConversionRate{}.FromCreateCurrencyConversionRateRequestEntity(req))
 	}
-	if err := r.db.Debug().Table(conversionRate.String()).Create(&models).Error; err != nil {
+	if err := r.db.Table(conversionRate.String()).Create(&models).Error; err != nil {
 		return errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[InsertConversionRates] err: %v", err))
 	}
 	return nil
@@ -68,7 +68,7 @@ func (r *repository) InsertConversionRates(ctx context.Context, reqs []*entity.C
 
 func (r *repository) FindConversionRateByFromTo(ctx context.Context, from, to int) (*entity.CurrencyConversionRate, error) {
 	var out CurrencyConversionRate
-	err := r.db.Debug().Table(conversionRate.String()).
+	err := r.db.Table(conversionRate.String()).
 		Where("from_currency_id = ?", from).
 		Where("to_currency_id = ?", to).
 		Where("is_deleted = ?", false).
@@ -90,7 +90,7 @@ func (r *repository) FindCurrencies(ctx context.Context, pagination *entity.Pagi
 	var currencies []*Currency
 	var totalItems int64
 	var totalPage float64
-	baseQuery := r.db.Debug().Table(currency.String())
+	baseQuery := r.db.Table(currency.String())
 	err := baseQuery.Count(&totalItems).Error
 	if err != nil {
 		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
