@@ -111,3 +111,58 @@ curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion
     "message": "conversion rate from 3 to 20 not found"
 }
 ```
+
+## Get list currencies
+### Request
+`GET /api/v1/currency/list`
+
+```shell
+curl --location --request GET 'http://localhost:8081/api/v1/currency/list?startingAfter=0&startingBefore=0&limit=0&all=false' \
+--data-raw ''
+```
+
+#### Params
+- startingAfter (int, optional, used to fetch next page by given the last ID in current page)
+- startingBefore (int, optional, used to fetch previous page by given the first ID in current page)
+- limit (int, required if all=false, should be greater than 0)
+- all (boolean, optional, set to true if you want to load all data)
+
+### Response
+```shell
+# Success
+{
+    "status": "success",
+    "code": 200,
+    "data": {
+        "currencies": [
+            {
+                "id": 3,
+                "name": "sdas"
+            },
+            {
+                "id": 4,
+                "name": "sdas"
+            }
+        ],
+        "pagination": {
+            "totalItems": 6,
+            "totalPage": 3
+        }
+    },
+    "message": "success"
+}
+
+# Empty data
+{
+    "status": "success",
+    "code": 200,
+    "data": {
+        "currencies": null,
+        "pagination": {
+            "totalItems": 6,
+            "totalPage": 3
+        }
+    },
+    "message": "success"
+}
+```
