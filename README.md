@@ -74,3 +74,40 @@ curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion
     "message": " To is required"
 }
 ```
+
+## Convert currency
+### Request
+`POST /api/v1/currency/conversion/convert`
+
+```shell
+curl --location --request POST 'http://localhost:8081/api/v1/currency/conversion/convert' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "from":3,
+    "to":2,
+    "amount":29
+}'
+```
+
+#### Payload
+- from (int, required)
+- to (int, required)
+- amount(float, required, should be greater than or equal 0, default 0)
+
+### Response
+```shell
+# Success
+{
+    "status": "success",
+    "code": 200,
+    "data": 1,
+    "message": "success"
+}
+
+# Bad request
+{
+    "status": "error",
+    "code": 404,
+    "message": "conversion rate from 3 to 20 not found"
+}
+```

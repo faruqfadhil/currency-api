@@ -27,6 +27,8 @@ func (v *govalidator) ValidateParam(param interface{}) error {
 				msg += fmt.Sprintf(" %s is required", e.Field())
 			case "gte":
 				msg += fmt.Sprintf(" %s should be greater than or equal %s", e.Field(), e.Param())
+			case "gt":
+				msg += fmt.Sprintf(" %s should be greater than %s", e.Field(), e.Param())
 			default:
 				msg += fmt.Sprintf(" %s", err.Error())
 			}

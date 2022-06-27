@@ -5,7 +5,7 @@ import (
 )
 
 type Currency struct {
-	ID   int    `json:"id" validate:"required"`
+	ID   int    `json:"id" validate:"gt=0,required"`
 	Name string `json:"name" validate:"required"`
 }
 
