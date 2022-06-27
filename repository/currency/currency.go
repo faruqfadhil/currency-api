@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/faruqfadhil/currency-api/core/entity"
 	repoInterface "github.com/faruqfadhil/currency-api/core/repository"
@@ -79,4 +80,76 @@ func (r *repository) FindConversionRateByFromTo(ctx context.Context, from, to in
 		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindConversionRateByFromTo] err: %v", err))
 	}
 	return out.ToEntity(), nil
+}
+
+func (r *repository) FindCurrencies(ctx context.Context, pagination *entity.PaginationRequest) (*entity.CurrencyList, error) {
+	if err := pagination.Validate(); err != nil {
+		return nil, err
+	}
+
+	var currencies []*Currency
+	var totalItems int64
+	var totalPage float64
+	baseQuery := r.db.Debug().Table(currency.String())
+	err := baseQuery.Count(&totalItems).Error
+	if err != nil {
+		return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
+	}
+	if !pagination.All {
+		totalPage = math.Ceil(float64(totalItems) / float64(pagination.Limit))
+	}
+	paginationData := &entity.Pagination{
+		TotalItems: int(totalItems),
+		TotalPage:  int(totalPage),
+	}
+
+	if pagination.All {
+		err = baseQuery.Order("id asc").Find(&currencies).Error
+		if err != nil {
+			return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
+		}
+	}
+
+	if !pagination.All && pagination.StartingAfter == 0 && pagination.StartingBefore == 0 {
+		// Fetch first page.
+		err = baseQuery.Order("id asc").Limit(pagination.Limit).Find(&currencies).Error
+		if err != nil {
+			return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
+		}
+	} else if !pagination.All && pagination.StartingAfter > 0 {
+		// Fetch next page.
+		err = baseQuery.
+			Where("id > ?", pagination.StartingAfter).
+			Order("id asc").
+			Limit(pagination.Limit).
+			Find(&currencies).Error
+		if err != nil {
+			return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
+		}
+	} else if !pagination.All && pagination.StartingBefore > 0 {
+		// Fetch previous page.
+		query := `
+		SELECT * from (
+			SELECT * from currency c
+			WHERE c.id < ?
+			ORDER BY c.id DESC
+			limit ?
+		) as t
+		order by id
+		`
+		err = r.db.Raw(query, pagination.StartingBefore, pagination.Limit).Find(&currencies).Error
+		if err != nil {
+			return nil, errutil.New(errutil.ErrGeneralDB, fmt.Errorf("[FindCurrencies]: %v", err))
+		}
+	}
+
+	var entityCurrencies []*entity.Currency
+	for _, c := range currencies {
+		entityCurrencies = append(entityCurrencies, c.ToEntity())
+	}
+
+	return &entity.CurrencyList{
+		Currencies: entityCurrencies,
+		Pagination: paginationData,
+	}, nil
 }

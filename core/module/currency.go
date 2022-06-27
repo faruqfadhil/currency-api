@@ -16,6 +16,7 @@ type Usecase interface {
 	CreateCurrency(ctx context.Context, req *entity.CreateCurrencyRequest) error
 	CreateConversionRate(ctx context.Context, req *entity.CreateCurrencyConversionRate) error
 	Convert(ctx context.Context, req *entity.ConvertRequest) (float64, error)
+	GetCurrencies(ctx context.Context, pagination *entity.PaginationRequest) (*entity.CurrencyList, error)
 }
 
 type usecase struct {
@@ -74,4 +75,8 @@ func (u *usecase) Convert(ctx context.Context, req *entity.ConvertRequest) (floa
 		return 0, err
 	}
 	return math.Round(req.Amount * conversionRate.Rate), nil
+}
+
+func (u *usecase) GetCurrencies(ctx context.Context, pagination *entity.PaginationRequest) (*entity.CurrencyList, error) {
+	return u.repo.FindCurrencies(ctx, pagination)
 }

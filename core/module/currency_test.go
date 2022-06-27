@@ -199,3 +199,55 @@ func TestConvert(t *testing.T) {
 		})
 	}
 }
+
+func TestGetCurrencies(t *testing.T) {
+	tests := map[string]struct {
+		req *entity.PaginationRequest
+		out *entity.CurrencyList
+		err error
+	}{
+		"success": {
+			req: &entity.PaginationRequest{
+				All: true,
+			},
+			out: &entity.CurrencyList{
+				Currencies: []*entity.Currency{
+					{
+						ID:   1,
+						Name: "t1",
+					},
+				},
+				Pagination: &entity.Pagination{
+					TotalItems: 1,
+					TotalPage:  0,
+				},
+			},
+			err: nil,
+		},
+	}
+	repo := &currencyRepo.RepositoryMock{Mock: mock.Mock{}}
+	validator := &validation.ValidatorMock{Mock: mock.Mock{}}
+	svc := New(repo, validator)
+	repo.Mock.On("FindCurrencies", context.Background(), &entity.PaginationRequest{
+		All: true,
+	}).Return(&entity.CurrencyList{
+		Currencies: []*entity.Currency{
+			{
+				ID:   1,
+				Name: "t1",
+			},
+		},
+		Pagination: &entity.Pagination{
+			TotalItems: 1,
+			TotalPage:  0,
+		},
+	}, nil)
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			out, err := svc.GetCurrencies(context.Background(), test.req)
+			assert.Equal(t, errutil.GetTypeErr(test.err), errutil.GetTypeErr(err))
+			assert.Equal(t, test.out, out)
+		})
+	}
+}

@@ -34,3 +34,11 @@ func (r *RepositoryMock) FindConversionRateByFromTo(ctx context.Context, from, t
 	}
 	return args.Get(0).(*entity.CurrencyConversionRate), nil
 }
+
+func (r *RepositoryMock) FindCurrencies(ctx context.Context, pagination *entity.PaginationRequest) (*entity.CurrencyList, error) {
+	args := r.Mock.Called(ctx, pagination)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.CurrencyList), nil
+}

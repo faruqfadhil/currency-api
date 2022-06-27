@@ -28,6 +28,7 @@ func main() {
 		apiv1.POST("/create", handler.CreateCurrency)
 		apiv1.POST("/conversion/create", handler.CreateConversionRate)
 		apiv1.POST("/conversion/convert", handler.Convert)
+		apiv1.GET("/list", handler.GetCurrencies)
 	}
 	router.Run(fmt.Sprintf(":%s", cfg.Port))
 }
