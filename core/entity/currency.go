@@ -47,6 +47,8 @@ type Pagination struct {
 	TotalPage  int `json:"totalPage"`
 }
 
+// PaginationRequest represent the pagination request, we use seek method for paginate the data.
+// Detail about seek methos: https://www.slideshare.net/MarkusWinand/p2d2-pagination-done-the-postgresql-way?ref=https://use-the-index-luke.com/no-offset
 type PaginationRequest struct {
 	// StartingAfter used to fetch next page by given the last ID in current page.
 	StartingAfter int `json:"startingAfter"`
