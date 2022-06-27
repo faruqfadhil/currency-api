@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 
 	"github.com/faruqfadhil/currency-api/core/entity"
 	"github.com/faruqfadhil/currency-api/core/repository"
@@ -74,7 +73,7 @@ func (u *usecase) Convert(ctx context.Context, req *entity.ConvertRequest) (floa
 		}
 		return 0, err
 	}
-	return math.Round(req.Amount * conversionRate.Rate), nil
+	return req.Amount * conversionRate.Rate, nil
 }
 
 func (u *usecase) GetCurrencies(ctx context.Context, pagination *entity.PaginationRequest) (*entity.CurrencyList, error) {

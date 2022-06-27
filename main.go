@@ -17,6 +17,11 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("unable to load env, err: %v", err)
+	}
+
 	db := conn()
 	repo := currencyRepo.New(db)
 	internalValidator := validation.NewGoValidator(validator.New())
@@ -30,14 +35,10 @@ func main() {
 		apiv1.POST("/conversion/convert", handler.Convert)
 		apiv1.GET("/list", handler.GetCurrencies)
 	}
-	router.Run()
+	router.Run(fmt.Sprintf(":%s", os.Getenv("GIN_PORT")))
 }
 
 func conn() *gorm.DB {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("unable to load env, err: %v", err)
-	}
 	defaultParams := "charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DATABASE"), defaultParams)
 
