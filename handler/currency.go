@@ -11,6 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	adminUserCode string = "admin"
+)
+
 type HTTPHandler struct {
 	usecase module.Usecase
 }
@@ -27,6 +31,11 @@ func (h *HTTPHandler) CreateCurrency(c *gin.Context) {
 		api.ResponseFailed(c, errutil.ErrGeneralBadRequest)
 		return
 	}
+
+	// TODO: get user code from request context.
+	if payload != nil {
+		payload.CreatedBy = adminUserCode
+	}
 	err := h.usecase.CreateCurrency(context.Background(), payload)
 	if err != nil {
 		api.ResponseFailed(c, err)
@@ -41,6 +50,10 @@ func (h *HTTPHandler) CreateConversionRate(c *gin.Context) {
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		api.ResponseFailed(c, errutil.ErrGeneralBadRequest)
 		return
+	}
+	// TODO: get user code from request context.
+	if payload != nil {
+		payload.CreatedBy = adminUserCode
 	}
 	err := h.usecase.CreateConversionRate(context.Background(), payload)
 	if err != nil {
